@@ -1,0 +1,50 @@
+services:
+  libbpf-bootstrap:
+    build:
+      context: .
+      dockerfile: libbpf-bootstrap.dockerfile
+    image: libbpf-bootstrap
+    container_name: libbpf-bootstrap
+    privileged: true
+    environment:
+      PROGRAM_NAME: helloworld
+    volumes:
+      - ./code/libbpf-bootstrap:/libbpf-bootstrap/examples/code
+      - /sys:/sys:ro
+    command:
+      - sh
+      - -c
+      - |
+        cd /libbpf-bootstrap/examples/code
+        mkdir build
+        rm -rf build/*
+        cd build
+        cmake -DCMAKE_EXE_LINKER_FLAGS="-static" ..
+        make $${PROGRAM_NAME}
+        timeout 0.5s ./$${PROGRAM_NAME}
+        tail -f /dev/null
+  
+  old-libbpf:
+    build:
+      context: .
+      dockerfile: old-libbpf.dockerfile
+    image: old-libbpf
+    container_name: old-libbpf
+    privileged: true
+    environment:
+      PROGRAM_NAME: helloworld
+    volumes:
+      - ./code/old-libbpf:/libbpf-bootstrap/examples/code
+      - /sys:/sys:ro
+    command:
+      - sh
+      - -c
+      - |
+        cd /libbpf-bootstrap/examples/code
+        mkdir build
+        rm -rf build/*
+        cd build
+        cmake -DCMAKE_EXE_LINKER_FLAGS="-static" ..
+        make $${PROGRAM_NAME}
+        timeout 0.5s ./$${PROGRAM_NAME}
+        tail -f /dev/null
