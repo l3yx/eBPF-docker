@@ -7,7 +7,7 @@ services:
     container_name: libbpf-bootstrap
     privileged: true
     environment:
-      PROGRAM_NAME: helloworld
+      PROGRAM_NAME: minimal_legacy
     volumes:
       - ./code/libbpf-bootstrap:/libbpf-bootstrap/examples/code
       - /sys:/sys:ro
