@@ -10,7 +10,7 @@ services:
       PROGRAM_NAME: minimal_legacy
     volumes:
       - ./code/libbpf-bootstrap:/libbpf-bootstrap/examples/code
-      - /sys:/sys:ro
+      - /sys/kernel/debug/:/sys/kernel/debug/:rw
     command:
       - sh
       - -c
@@ -35,7 +35,7 @@ services:
       PROGRAM_NAME: helloworld
     volumes:
       - ./code/old-libbpf:/libbpf-bootstrap/examples/code
-      - /sys:/sys:ro
+      - /sys/kernel/debug/:/sys/kernel/debug/:rw
     command:
       - sh
       - -c
