@@ -24,6 +24,32 @@ services:
         timeout 0.5s ./$${PROGRAM_NAME}
         tail -f /dev/null
   
+  libbpf-bootstrap_code-server:
+    build:
+      context: .
+      dockerfile: libbpf-bootstrap_code-server.dockerfile
+    image: libbpf-bootstrap_code-server
+    container_name: libbpf-bootstrap_code-server
+    privileged: true
+    environment:
+      PUID: 0
+      PASSWORD: password
+      DEFAULT_WORKSPACE: /libbpf-bootstrap/examples/code
+    volumes:
+      - ./code/libbpf-bootstrap_code-server:/libbpf-bootstrap/examples/code
+      - /sys/kernel/debug/:/sys/kernel/debug/:rw
+    ports:
+      - 8080:8443
+    entrypoint: ["sh","-c"]
+    command:
+      - |
+        cd /libbpf-bootstrap/examples/code
+        mkdir build
+        rm -rf build/*
+        cd build
+        cmake -DCMAKE_EXE_LINKER_FLAGS="-static" ..
+        exec /init
+  
   old-libbpf:
     build:
       context: .
