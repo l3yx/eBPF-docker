@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
 
+set(PATH_TO_CHECK ${CMAKE_CURRENT_SOURCE_DIR}/../../bpftool/src)
+
 cmake_minimum_required(VERSION 3.16)
 project(examples C)
 
@@ -24,6 +26,19 @@ ExternalProject_Add(libbpf
   INSTALL_COMMAND ""
   STEP_TARGETS build
 )
+
+if(EXISTS ${PATH_TO_CHECK})
+  ExternalProject_Add(bpftool
+    PREFIX bpftool
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../bpftool/src
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND make bootstrap
+      OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/bpftool/
+    BUILD_IN_SOURCE TRUE
+    INSTALL_COMMAND ""
+    STEP_TARGETS build
+  )
+endif()
 
 find_program(CARGO_EXISTS cargo)
 if(CARGO_EXISTS)
@@ -56,7 +71,11 @@ elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "loongarch64")
   set(ARCH "loongarch")
 endif()
 
-set(BPFOBJECT_BPFTOOL_EXE /usr/sbin/bpftool)
+if(EXISTS ${PATH_TO_CHECK})
+  set(BPFOBJECT_BPFTOOL_EXE ${CMAKE_CURRENT_BINARY_DIR}/bpftool/bootstrap/bpftool)
+else()
+  set(BPFOBJECT_BPFTOOL_EXE /usr/sbin/bpftool)
+endif()
 set(BPFOBJECT_VMLINUX_H ${CMAKE_CURRENT_SOURCE_DIR}/../../vmlinux/${ARCH}/vmlinux.h)
 set(LIBBPF_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/libbpf)
 set(LIBBPF_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/libbpf/libbpf.a)
@@ -72,7 +91,12 @@ foreach(app ${apps})
 
   # Build object skeleton and depend skeleton on libbpf build
   bpf_object(${app_stem} ${app_stem}.bpf.c)
-  add_dependencies(${app_stem}_skel libbpf-build)
+  if(EXISTS ${PATH_TO_CHECK})
+    add_dependencies(${app_stem}_skel libbpf-build bpftool-build)
+  else()
+    add_dependencies(${app_stem}_skel libbpf-build)
+  endif()
+
 
   add_executable(${app_stem} ${app_stem}.c)
   target_link_libraries(${app_stem} ${app_stem}_skel)

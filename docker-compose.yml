@@ -2,7 +2,7 @@ services:
   libbpf-bootstrap:
     build:
       context: .
-      dockerfile: libbpf-bootstrap.dockerfile
+      dockerfile: dockerfile/libbpf-bootstrap.dockerfile
     image: libbpf-bootstrap
     container_name: libbpf-bootstrap
     privileged: true
@@ -16,18 +16,16 @@ services:
       - -c
       - |
         cd /libbpf-bootstrap/examples/code
-        mkdir build
-        rm -rf build/*
-        cd build
-        cmake -DCMAKE_EXE_LINKER_FLAGS="-static" ..
-        make $${PROGRAM_NAME}
-        timeout 0.5s ./$${PROGRAM_NAME}
+        rm -rf build/
+        cmake -DCMAKE_EXE_LINKER_FLAGS="-static" -S . -B build
+        cmake --build build --target $${PROGRAM_NAME}
+        timeout 0.5s ./build/$${PROGRAM_NAME}
         tail -f /dev/null
   
   libbpf-bootstrap_code-server:
     build:
       context: .
-      dockerfile: libbpf-bootstrap_code-server.dockerfile
+      dockerfile: dockerfile/libbpf-bootstrap_code-server.dockerfile
     image: libbpf-bootstrap_code-server
     container_name: libbpf-bootstrap_code-server
     privileged: true
@@ -44,16 +42,12 @@ services:
     command:
       - |
         cd /libbpf-bootstrap/examples/code
-        mkdir build
-        rm -rf build/*
-        cd build
-        cmake -DCMAKE_EXE_LINKER_FLAGS="-static" ..
         exec /init
   
   old-libbpf:
     build:
       context: .
-      dockerfile: old-libbpf.dockerfile
+      dockerfile: dockerfile/old-libbpf.dockerfile
     image: old-libbpf
     container_name: old-libbpf
     privileged: true
@@ -67,10 +61,8 @@ services:
       - -c
       - |
         cd /libbpf-bootstrap/examples/code
-        mkdir build
-        rm -rf build/*
-        cd build
-        cmake -DCMAKE_EXE_LINKER_FLAGS="-static" ..
-        make $${PROGRAM_NAME}
-        timeout 0.5s ./$${PROGRAM_NAME}
+        rm -rf build/
+        cmake -DCMAKE_EXE_LINKER_FLAGS="-static" -S . -B build
+        cmake --build build --target $${PROGRAM_NAME}
+        timeout 0.5s ./build/$${PROGRAM_NAME}
         tail -f /dev/null

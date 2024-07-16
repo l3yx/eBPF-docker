@@ -19,4 +19,4 @@ RUN unzip libbpf.zip && \
     rm *.zip && \
     rm bpftool.deb
 
-WORKDIR /libbpf-bootstrap/examples/code/build
+WORKDIR /libbpf-bootstrap/examples/code/

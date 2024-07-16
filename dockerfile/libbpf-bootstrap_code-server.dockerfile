@@ -21,4 +21,4 @@ RUN unzip libbpf.zip && \
     mv bpftool libbpf-bootstrap/ && \
     rm *.zip
 
-WORKDIR /libbpf-bootstrap/examples/code/build
+WORKDIR /libbpf-bootstrap/examples/code/
