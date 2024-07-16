@@ -7,34 +7,30 @@ services:
     container_name: libbpf-bootstrap
     privileged: true
     environment:
-      PROGRAM_NAME: minimal_legacy
+      PROGRAM_NAME: helloworld
     volumes:
-      - ./code/libbpf-bootstrap:/libbpf-bootstrap/examples/code
+      - ./code:/libbpf-bootstrap/examples/code
       - /sys/kernel/debug/:/sys/kernel/debug/:rw
+    entrypoint: ["sh","-c"]
     command:
-      - sh
-      - -c
       - |
         cd /libbpf-bootstrap/examples/code
         rm -rf build/
-        cmake -DCMAKE_EXE_LINKER_FLAGS="-static" -S . -B build
-        cmake --build build --target $${PROGRAM_NAME}
-        timeout 0.5s ./build/$${PROGRAM_NAME}
-        tail -f /dev/null
-  
-  libbpf-bootstrap_code-server:
+        sh build.sh $${PROGRAM_NAME}
+
+  code-server:
     build:
       context: .
-      dockerfile: dockerfile/libbpf-bootstrap_code-server.dockerfile
-    image: libbpf-bootstrap_code-server
-    container_name: libbpf-bootstrap_code-server
+      dockerfile: dockerfile/code-server.dockerfile
+    image: code-server
+    container_name: code-server
     privileged: true
     environment:
       PUID: 0
-      PASSWORD: password
+      PASSWORD: ebpf_code-server
       DEFAULT_WORKSPACE: /libbpf-bootstrap/examples/code
     volumes:
-      - ./code/libbpf-bootstrap_code-server:/libbpf-bootstrap/examples/code
+      - ./code:/libbpf-bootstrap/examples/code
       - /sys/kernel/debug/:/sys/kernel/debug/:rw
     ports:
       - 8080:8443
@@ -42,27 +38,5 @@ services:
     command:
       - |
         cd /libbpf-bootstrap/examples/code
-        exec /init
-  
-  old-libbpf:
-    build:
-      context: .
-      dockerfile: dockerfile/old-libbpf.dockerfile
-    image: old-libbpf
-    container_name: old-libbpf
-    privileged: true
-    environment:
-      PROGRAM_NAME: helloworld
-    volumes:
-      - ./code/old-libbpf:/libbpf-bootstrap/examples/code
-      - /sys/kernel/debug/:/sys/kernel/debug/:rw
-    command:
-      - sh
-      - -c
-      - |
-        cd /libbpf-bootstrap/examples/code
         rm -rf build/
-        cmake -DCMAKE_EXE_LINKER_FLAGS="-static" -S . -B build
-        cmake --build build --target $${PROGRAM_NAME}
-        timeout 0.5s ./build/$${PROGRAM_NAME}
-        tail -f /dev/null
+        exec /init
